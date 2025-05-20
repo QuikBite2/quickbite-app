@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'cliente_home.dart'; // Importar ClienteHome
+import 'cocinero_home.dart'; // Importar CocineroHome
+import 'repartidor_home.dart'; // Importar RepartidorHome
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,16 +45,32 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       final rol = doc.data()!['rol'];
+      final nombre = doc.data()!['nombre'] ?? 'Usuario';
 
       switch (rol) {
         case 'cliente':
-          Navigator.pushReplacementNamed(context, '/cliente');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ClienteHome(nombre: nombre),
+            ),
+          );
           break;
         case 'cocinero':
-          Navigator.pushReplacementNamed(context, '/cocinero');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CocineroHome(nombre: nombre),
+            ),
+          );
           break;
         case 'repartidor':
-          Navigator.pushReplacementNamed(context, '/repartidor');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RepartidorHome(nombre: nombre),
+            ),
+          );
           break;
         default:
           throw Exception('Rol desconocido.');

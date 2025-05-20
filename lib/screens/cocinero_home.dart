@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'productos_cocinero.dart';
 
 class CocineroHome extends StatelessWidget {
   final String nombre;
@@ -18,6 +19,16 @@ class CocineroHome extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Pedidos - Cocinero'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.restaurant_menu),
+            tooltip: 'Mis productos',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProductosCocinero()),
+              );
+            },
+          ),
           IconButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
@@ -60,7 +71,11 @@ class CocineroHome extends StatelessWidget {
                     _actualizarEstado(pedido.id, nuevo);
                   },
                   child: Text(
-                    estado == 'pendiente' ? 'Iniciar' : 'Marcar listo',
+                    estado == 'pendiente'
+                        ? 'Preparar'
+                        : estado == 'en_preparacion'
+                        ? 'Listo'
+                        : 'Finalizado',
                   ),
                 ),
               );

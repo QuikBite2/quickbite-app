@@ -3,13 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-// Screens
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/cliente_home.dart';
 import 'screens/cocinero_home.dart';
 import 'screens/repartidor_home.dart';
-import 'screens/admin_panel.dart'; // <-- Importante
+import 'screens/cliente_pedidos.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +21,6 @@ class MyApp extends StatelessWidget {
 
   Future<Widget> _getHomeScreen() async {
     final user = FirebaseAuth.instance.currentUser;
-    print("UID del usuario logueado: ${user?.uid}");
 
     if (user == null) return const LoginScreen();
 
@@ -32,8 +30,12 @@ class MyApp extends StatelessWidget {
             .doc(user.uid)
             .get();
 
-    final rol = doc.data()?['rol'];
-    final nombre = doc.data()?['nombre'] ?? '';
+    if (!doc.exists || !doc.data()!.containsKey('rol')) {
+      return const LoginScreen(); // rol desconocido
+    }
+
+    final rol = doc['rol'];
+    final nombre = doc['nombre'] ?? 'Usuario';
 
     switch (rol) {
       case 'cliente':
@@ -42,10 +44,8 @@ class MyApp extends StatelessWidget {
         return CocineroHome(nombre: nombre);
       case 'repartidor':
         return RepartidorHome(nombre: nombre);
-      case 'super_admin':
-        return const AdminPanel(); // Aquí va el panel de administrador
       default:
-        return const LoginScreen();
+        return const LoginScreen(); // rol no válido
     }
   }
 
@@ -54,23 +54,25 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'QuickBite',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.deepOrange, useMaterial3: true),
       routes: {
-        '/register': (_) => const RegisterScreen(),
-        '/cliente': (_) => const ClienteHome(nombre: ''),
-        '/cocinero': (_) => const CocineroHome(nombre: ''),
-        '/repartidor': (_) => const RepartidorHome(nombre: ''),
+        '/':
+            (context) => FutureBuilder(
+              future: _getHomeScreen(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return snapshot.data ?? const LoginScreen();
+              },
+            ),
+        '/cliente_pedidos': (context) => const ClientePedidos(),
+        // '/productos_cocinero': (context) => const ProductosCocinero(), // Solo si navegas por ruta
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
       },
-      home: FutureBuilder<Widget>(
-        future: _getHomeScreen(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          return snapshot.data!;
-        },
-      ),
     );
   }
 }

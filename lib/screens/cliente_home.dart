@@ -22,6 +22,13 @@ class ClienteHome extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.pushNamed(context, '/cliente_pedidos');
+        },
+        label: const Text('Mis Pedidos'),
+        icon: const Icon(Icons.receipt_long),
+      ),
       body: Column(
         children: [
           Padding(
